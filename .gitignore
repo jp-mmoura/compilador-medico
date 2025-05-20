@@ -19,30 +19,39 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+
+# Virtual Environment
 venv/
+ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Database
+*.db
+*.sqlite3
 
 # Node
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
-
-# IDEs and editors
-.idea/
-.vscode/
-*.swp
-*.swo
-.DS_Store
 
 # Build
-dist/
-dist-ssr/
-*.local
+/frontend/dist
+/frontend/build
 
-# Environment
+# Environment variables
 .env
 .env.local
 .env.development.local
 .env.test.local
-.env.production.local 
+.env.production.local
+
+# Logs
+*.log
+logs/ 
