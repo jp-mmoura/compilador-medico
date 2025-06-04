@@ -66,4 +66,28 @@ def obter_medicamento(
     medicamento = db.query(Medicamento).filter(Medicamento.id == medicamento_id).first()
     if not medicamento:
         raise HTTPException(status_code=404, detail="Medicamento não encontrado")
-    return medicamento 
+    return medicamento
+
+@router.delete("/{medicamento_id}")
+def deletar_medicamento(
+    medicamento_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+) -> Any:
+    """
+    Deleta um medicamento específico.
+    """
+    if current_user.tipo != "medico":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    medicamento = db.query(Medicamento).filter(
+        Medicamento.id == medicamento_id,
+        Medicamento.medico_id == current_user.id
+    ).first()
+    
+    if not medicamento:
+        raise HTTPException(status_code=404, detail="Medicamento não encontrado")
+    
+    db.delete(medicamento)
+    db.commit()
+    return {"message": "Medicamento deletado com sucesso"} 

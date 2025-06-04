@@ -72,4 +72,28 @@ def listar_gastos_paciente(
         Gasto.paciente_id == paciente_id,
         Gasto.medico_id == current_user.id
     ).all()
-    return gastos 
+    return gastos
+
+@router.delete("/{gasto_id}")
+def deletar_gasto(
+    gasto_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+) -> Any:
+    """
+    Deleta um gasto específico.
+    """
+    if current_user.tipo != "medico":
+        raise HTTPException(status_code=403, detail="Acesso negado")
+    
+    gasto = db.query(Gasto).filter(
+        Gasto.id == gasto_id,
+        Gasto.medico_id == current_user.id
+    ).first()
+    
+    if not gasto:
+        raise HTTPException(status_code=404, detail="Gasto não encontrado")
+    
+    db.delete(gasto)
+    db.commit()
+    return {"message": "Gasto deletado com sucesso"} 
