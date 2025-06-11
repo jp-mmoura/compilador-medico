@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { ProntuarioModal } from '../components/ProntuarioModal';
+import { Sidebar } from '../components/Sidebar';
 
 interface Paciente {
   id: number;
@@ -38,7 +39,7 @@ interface Gasto {
 }
 
 export function MedicoDashboard() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [activeTab, setActiveTab] = useState('pacientes');
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
@@ -320,457 +321,472 @@ export function MedicoDashboard() {
     setIsProntuarioOpen(true);
   };
 
+  if (!user || !token) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center">
+            <p className="text-gray-600">Por favor, faça login para acessar o dashboard.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-red-600 mb-8 text-center drop-shadow">Dashboard do Médico</h1>
+    <div className="min-h-screen bg-gray-50">
+      <Sidebar />
+      <div className="lg:ml-64 p-6">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold text-red-600 mb-8 text-center drop-shadow">Dashboard do Médico</h1>
 
-        {/* Tabs */}
-        <div className="flex space-x-4 mb-8">
-          <button
-            onClick={() => setActiveTab('pacientes')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'pacientes'
-                ? 'bg-red-600 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            Pacientes
-          </button>
-          <button
-            onClick={() => setActiveTab('medicamentos')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'medicamentos'
-                ? 'bg-red-600 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            Medicamentos
-          </button>
-          <button
-            onClick={() => setActiveTab('consultas')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'consultas'
-                ? 'bg-red-600 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            Consultas
-          </button>
-          <button
-            onClick={() => setActiveTab('gastos')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'gastos'
-                ? 'bg-red-600 text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
-            }`}
-          >
-            Gastos
-          </button>
+          {/* Tabs */}
+          <div className="flex space-x-4 mb-8">
+            <button
+              onClick={() => setActiveTab('pacientes')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'pacientes'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Pacientes
+            </button>
+            <button
+              onClick={() => setActiveTab('medicamentos')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'medicamentos'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Medicamentos
+            </button>
+            <button
+              onClick={() => setActiveTab('consultas')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'consultas'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Consultas
+            </button>
+            <button
+              onClick={() => setActiveTab('gastos')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'gastos'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Gastos
+            </button>
+          </div>
+
+          {/* Mensagens de feedback */}
+          {activeTab === 'pacientes' && error && (
+            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-4">
+              {error}
+            </div>
+          )}
+          {activeTab === 'pacientes' && success && (
+            <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-4">
+              {success}
+            </div>
+          )}
+
+          {/* Conteúdo das tabs */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Formulários */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold text-red-600 mb-4">
+                {activeTab === 'pacientes' && 'Novo Paciente'}
+                {activeTab === 'medicamentos' && 'Novo Medicamento'}
+                {activeTab === 'consultas' && 'Nova Consulta'}
+                {activeTab === 'gastos' && 'Novo Gasto'}
+              </h2>
+
+              {activeTab === 'pacientes' && (
+                <form onSubmit={handleSubmitPaciente} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                    <input
+                      type="text"
+                      value={novoPaciente.nome}
+                      onChange={(e) => setNovoPaciente({ ...novoPaciente, nome: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={novoPaciente.email}
+                      onChange={(e) => setNovoPaciente({ ...novoPaciente, email: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                    <input
+                      type="password"
+                      value={novoPaciente.senha}
+                      onChange={(e) => setNovoPaciente({ ...novoPaciente, senha: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading.submit}
+                    className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    {loading.submit ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      </div>
+                    ) : (
+                      'Criar Paciente'
+                    )}
+                  </button>
+                </form>
+              )}
+
+              {activeTab === 'medicamentos' && (
+                <form onSubmit={handleSubmitMedicamento} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                    <input
+                      type="text"
+                      value={novoMedicamento.nome}
+                      onChange={(e) => setNovoMedicamento({ ...novoMedicamento, nome: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                    <input
+                      type="text"
+                      value={novoMedicamento.descricao}
+                      onChange={(e) => setNovoMedicamento({ ...novoMedicamento, descricao: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Dosagem</label>
+                    <input
+                      type="text"
+                      value={novoMedicamento.dosagem}
+                      onChange={(e) => setNovoMedicamento({ ...novoMedicamento, dosagem: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Frequência</label>
+                    <input
+                      type="text"
+                      value={novoMedicamento.frequencia}
+                      onChange={(e) => setNovoMedicamento({ ...novoMedicamento, frequencia: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
+                    <select
+                      value={novoMedicamento.paciente_id}
+                      onChange={(e) => setNovoMedicamento({ ...novoMedicamento, paciente_id: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    >
+                      <option value="">Selecione um paciente</option>
+                      {pacientes.map((paciente) => (
+                        <option key={paciente.id} value={paciente.id}>
+                          {paciente.nome}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading.submit}
+                    className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    {loading.submit ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      </div>
+                    ) : (
+                      'Criar Medicamento'
+                    )}
+                  </button>
+                </form>
+              )}
+
+              {activeTab === 'consultas' && (
+                <form onSubmit={handleSubmitConsulta} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
+                    <select
+                      value={novaConsulta.paciente_id}
+                      onChange={(e) => setNovaConsulta({ ...novaConsulta, paciente_id: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    >
+                      <option value="">Selecione um paciente</option>
+                      {pacientes.map((paciente) => (
+                        <option key={paciente.id} value={paciente.id}>
+                          {paciente.nome}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                    <textarea
+                      value={novaConsulta.descricao}
+                      onChange={(e) => setNovaConsulta({ ...novaConsulta, descricao: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading.submit}
+                    className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    {loading.submit ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      </div>
+                    ) : (
+                      'Criar Consulta'
+                    )}
+                  </button>
+                </form>
+              )}
+
+              {activeTab === 'gastos' && (
+                <form onSubmit={handleSubmitGasto} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
+                    <select
+                      value={novoGasto.paciente_id}
+                      onChange={(e) => setNovoGasto({ ...novoGasto, paciente_id: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    >
+                      <option value="">Selecione um paciente</option>
+                      {pacientes.map((paciente) => (
+                        <option key={paciente.id} value={paciente.id}>
+                          {paciente.nome}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+                    <input
+                      type="text"
+                      value={novoGasto.descricao}
+                      onChange={(e) => setNovoGasto({ ...novoGasto, descricao: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={novoGasto.valor}
+                      onChange={(e) => setNovoGasto({ ...novoGasto, valor: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                    <select
+                      value={novoGasto.categoria}
+                      onChange={(e) => setNovoGasto({ ...novoGasto, categoria: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      required
+                    >
+                      <option value="">Selecione uma categoria</option>
+                      <option value="consulta">Consulta</option>
+                      <option value="medicamento">Medicamento</option>
+                    </select>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading.submit}
+                    className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    {loading.submit ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      </div>
+                    ) : (
+                      'Registrar Gasto'
+                    )}
+                  </button>
+                </form>
+              )}
+            </div>
+
+            {/* Listas */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold text-red-600 mb-4">
+                {activeTab === 'pacientes' && 'Lista de Pacientes'}
+                {activeTab === 'medicamentos' && 'Lista de Medicamentos'}
+                {activeTab === 'consultas' && 'Lista de Consultas'}
+                {activeTab === 'gastos' && 'Lista de Gastos'}
+              </h2>
+
+              {activeTab === 'pacientes' && (
+                <div className="space-y-4">
+                  {loading.pacientes ? (
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                    </div>
+                  ) : (
+                    pacientes.map((paciente) => (
+                      <div key={paciente.id} className="p-4 bg-gray-50 rounded-lg">
+                        <h3 className="font-medium text-gray-900">{paciente.nome}</h3>
+                        <p className="text-gray-600">{paciente.email}</p>
+                        <button
+                          onClick={() => handleVerProntuario(paciente)}
+                          className="mt-2 text-sm text-red-600 hover:text-red-700"
+                        >
+                          Ver Prontuário
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'medicamentos' && (
+                <div className="space-y-4">
+                  {loading.medicamentos ? (
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                    </div>
+                  ) : (
+                    medicamentos.map((medicamento) => (
+                      <div key={medicamento.id} className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium text-gray-900">{medicamento.nome}</h3>
+                            <p className="text-gray-600">{medicamento.descricao}</p>
+                            <p className="text-sm text-gray-500">
+                              Dosagem: {medicamento.dosagem} - Frequência: {medicamento.frequencia}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteMedicamento(medicamento.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'consultas' && (
+                <div className="space-y-4">
+                  {loading.consultas ? (
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                    </div>
+                  ) : (
+                    consultas.map((consulta) => (
+                      <div key={consulta.id} className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium text-gray-900">
+                              Consulta com {pacientes.find(p => p.id === consulta.paciente_id)?.nome}
+                            </h3>
+                            <p className="text-gray-600">{consulta.descricao}</p>
+                            <p className="text-sm text-gray-500">
+                              Data: {new Date(consulta.data).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteConsulta(consulta.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'gastos' && (
+                <div className="space-y-4">
+                  {loading.gastos ? (
+                    <div className="flex justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                    </div>
+                  ) : (
+                    gastos.map((gasto) => (
+                      <div key={gasto.id} className="p-4 bg-gray-50 rounded-lg">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium text-gray-900">
+                              {gasto.descricao} - {pacientes.find(p => p.id === gasto.paciente_id)?.nome}
+                            </h3>
+                            <p className="text-gray-600">R$ {gasto.valor.toFixed(2)}</p>
+                            <p className="text-sm text-gray-500">
+                              Categoria: {gasto.categoria} - Data: {new Date(gasto.data).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteGasto(gasto.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Add the modal at the end of the component, before the final closing div */}
+          {selectedPaciente && (
+            <ProntuarioModal
+              isOpen={isProntuarioOpen}
+              onClose={() => setIsProntuarioOpen(false)}
+              paciente={selectedPaciente}
+              medicamentos={medicamentos.filter(m => m.paciente_id === selectedPaciente.id)}
+              consultas={consultas.filter(c => c.paciente_id === selectedPaciente.id)}
+              gastos={gastos.filter(g => g.paciente_id === selectedPaciente.id)}
+            />
+          )}
         </div>
-
-        {/* Mensagens de feedback */}
-        {activeTab === 'pacientes' && error && (
-          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-4">
-            {error}
-          </div>
-        )}
-        {activeTab === 'pacientes' && success && (
-          <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-4">
-            {success}
-          </div>
-        )}
-
-        {/* Conteúdo das tabs */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Formulários */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-bold text-red-600 mb-4">
-              {activeTab === 'pacientes' && 'Novo Paciente'}
-              {activeTab === 'medicamentos' && 'Novo Medicamento'}
-              {activeTab === 'consultas' && 'Nova Consulta'}
-              {activeTab === 'gastos' && 'Novo Gasto'}
-            </h2>
-
-            {activeTab === 'pacientes' && (
-              <form onSubmit={handleSubmitPaciente} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                  <input
-                    type="text"
-                    value={novoPaciente.nome}
-                    onChange={(e) => setNovoPaciente({ ...novoPaciente, nome: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={novoPaciente.email}
-                    onChange={(e) => setNovoPaciente({ ...novoPaciente, email: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-                  <input
-                    type="password"
-                    value={novoPaciente.senha}
-                    onChange={(e) => setNovoPaciente({ ...novoPaciente, senha: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading.submit}
-                  className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-                >
-                  {loading.submit ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    </div>
-                  ) : (
-                    'Criar Paciente'
-                  )}
-                </button>
-              </form>
-            )}
-
-            {activeTab === 'medicamentos' && (
-              <form onSubmit={handleSubmitMedicamento} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                  <input
-                    type="text"
-                    value={novoMedicamento.nome}
-                    onChange={(e) => setNovoMedicamento({ ...novoMedicamento, nome: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                  <input
-                    type="text"
-                    value={novoMedicamento.descricao}
-                    onChange={(e) => setNovoMedicamento({ ...novoMedicamento, descricao: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Dosagem</label>
-                  <input
-                    type="text"
-                    value={novoMedicamento.dosagem}
-                    onChange={(e) => setNovoMedicamento({ ...novoMedicamento, dosagem: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Frequência</label>
-                  <input
-                    type="text"
-                    value={novoMedicamento.frequencia}
-                    onChange={(e) => setNovoMedicamento({ ...novoMedicamento, frequencia: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
-                  <select
-                    value={novoMedicamento.paciente_id}
-                    onChange={(e) => setNovoMedicamento({ ...novoMedicamento, paciente_id: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  >
-                    <option value="">Selecione um paciente</option>
-                    {pacientes.map((paciente) => (
-                      <option key={paciente.id} value={paciente.id}>
-                        {paciente.nome}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading.submit}
-                  className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-                >
-                  {loading.submit ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    </div>
-                  ) : (
-                    'Criar Medicamento'
-                  )}
-                </button>
-              </form>
-            )}
-
-            {activeTab === 'consultas' && (
-              <form onSubmit={handleSubmitConsulta} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
-                  <select
-                    value={novaConsulta.paciente_id}
-                    onChange={(e) => setNovaConsulta({ ...novaConsulta, paciente_id: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  >
-                    <option value="">Selecione um paciente</option>
-                    {pacientes.map((paciente) => (
-                      <option key={paciente.id} value={paciente.id}>
-                        {paciente.nome}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                  <textarea
-                    value={novaConsulta.descricao}
-                    onChange={(e) => setNovaConsulta({ ...novaConsulta, descricao: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading.submit}
-                  className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-                >
-                  {loading.submit ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    </div>
-                  ) : (
-                    'Criar Consulta'
-                  )}
-                </button>
-              </form>
-            )}
-
-            {activeTab === 'gastos' && (
-              <form onSubmit={handleSubmitGasto} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Paciente</label>
-                  <select
-                    value={novoGasto.paciente_id}
-                    onChange={(e) => setNovoGasto({ ...novoGasto, paciente_id: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  >
-                    <option value="">Selecione um paciente</option>
-                    {pacientes.map((paciente) => (
-                      <option key={paciente.id} value={paciente.id}>
-                        {paciente.nome}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                  <input
-                    type="text"
-                    value={novoGasto.descricao}
-                    onChange={(e) => setNovoGasto({ ...novoGasto, descricao: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Valor</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={novoGasto.valor}
-                    onChange={(e) => setNovoGasto({ ...novoGasto, valor: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                  <select
-                    value={novoGasto.categoria}
-                    onChange={(e) => setNovoGasto({ ...novoGasto, categoria: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    required
-                  >
-                    <option value="">Selecione uma categoria</option>
-                    <option value="consulta">Consulta</option>
-                    <option value="medicamento">Medicamento</option>
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading.submit}
-                  className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-                >
-                  {loading.submit ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    </div>
-                  ) : (
-                    'Registrar Gasto'
-                  )}
-                </button>
-              </form>
-            )}
-          </div>
-
-          {/* Listas */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-bold text-red-600 mb-4">
-              {activeTab === 'pacientes' && 'Lista de Pacientes'}
-              {activeTab === 'medicamentos' && 'Lista de Medicamentos'}
-              {activeTab === 'consultas' && 'Lista de Consultas'}
-              {activeTab === 'gastos' && 'Lista de Gastos'}
-            </h2>
-
-            {activeTab === 'pacientes' && (
-              <div className="space-y-4">
-                {loading.pacientes ? (
-                  <div className="flex justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-                  </div>
-                ) : (
-                  pacientes.map((paciente) => (
-                    <div key={paciente.id} className="p-4 bg-gray-50 rounded-lg">
-                      <h3 className="font-medium text-gray-900">{paciente.nome}</h3>
-                      <p className="text-gray-600">{paciente.email}</p>
-                      <button
-                        onClick={() => handleVerProntuario(paciente)}
-                        className="mt-2 text-sm text-red-600 hover:text-red-700"
-                      >
-                        Ver Prontuário
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {activeTab === 'medicamentos' && (
-              <div className="space-y-4">
-                {loading.medicamentos ? (
-                  <div className="flex justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-                  </div>
-                ) : (
-                  medicamentos.map((medicamento) => (
-                    <div key={medicamento.id} className="p-4 bg-gray-50 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium text-gray-900">{medicamento.nome}</h3>
-                          <p className="text-gray-600">{medicamento.descricao}</p>
-                          <p className="text-sm text-gray-500">
-                            Dosagem: {medicamento.dosagem} - Frequência: {medicamento.frequencia}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteMedicamento(medicamento.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {activeTab === 'consultas' && (
-              <div className="space-y-4">
-                {loading.consultas ? (
-                  <div className="flex justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-                  </div>
-                ) : (
-                  consultas.map((consulta) => (
-                    <div key={consulta.id} className="p-4 bg-gray-50 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium text-gray-900">
-                            Consulta com {pacientes.find(p => p.id === consulta.paciente_id)?.nome}
-                          </h3>
-                          <p className="text-gray-600">{consulta.descricao}</p>
-                          <p className="text-sm text-gray-500">
-                            Data: {new Date(consulta.data).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteConsulta(consulta.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-
-            {activeTab === 'gastos' && (
-              <div className="space-y-4">
-                {loading.gastos ? (
-                  <div className="flex justify-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-                  </div>
-                ) : (
-                  gastos.map((gasto) => (
-                    <div key={gasto.id} className="p-4 bg-gray-50 rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium text-gray-900">
-                            {gasto.descricao} - {pacientes.find(p => p.id === gasto.paciente_id)?.nome}
-                          </h3>
-                          <p className="text-gray-600">R$ {gasto.valor.toFixed(2)}</p>
-                          <p className="text-sm text-gray-500">
-                            Categoria: {gasto.categoria} - Data: {new Date(gasto.data).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteGasto(gasto.id)}
-                          className="text-red-600 hover:text-red-700"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Add the modal at the end of the component, before the final closing div */}
-        {selectedPaciente && (
-          <ProntuarioModal
-            isOpen={isProntuarioOpen}
-            onClose={() => setIsProntuarioOpen(false)}
-            paciente={selectedPaciente}
-            medicamentos={medicamentos.filter(m => m.paciente_id === selectedPaciente.id)}
-            consultas={consultas.filter(c => c.paciente_id === selectedPaciente.id)}
-            gastos={gastos.filter(g => g.paciente_id === selectedPaciente.id)}
-          />
-        )}
       </div>
     </div>
   );

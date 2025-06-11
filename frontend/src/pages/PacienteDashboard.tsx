@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
+import { Sidebar } from '../components/Sidebar';
 
 ChartJS.register(
   CategoryScale,
@@ -315,119 +316,122 @@ export function PacienteDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-red-600 mb-8 text-center drop-shadow">Dashboard do Paciente</h1>
-        
-        {/* Mensagens de feedback */}
-        {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-4">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-4">
-            {success}
-          </div>
-        )}
+    <div className="min-h-screen bg-gray-50">
+      <Sidebar />
+      <div className="lg:ml-64 p-6">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold text-red-600 mb-8 text-center drop-shadow">Dashboard do Paciente</h1>
+          
+          {/* Mensagens de feedback */}
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-md mb-4">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md mb-4">
+              {success}
+            </div>
+          )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-red-500">
-            <h3 className="text-lg font-medium text-gray-700">Gasto Total</h3>
-            <p className="mt-2 text-3xl font-bold text-red-600">R$ {estatisticas.gasto_total.toFixed(2)}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500">
-            <h3 className="text-lg font-medium text-gray-700">Gasto em Consultas</h3>
-            <p className="mt-2 text-3xl font-bold text-blue-600">R$ {estatisticas.gasto_consultas.toFixed(2)}</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-gray-400">
-            <h3 className="text-lg font-medium text-gray-700">Gasto em Medicamentos</h3>
-            <p className="mt-2 text-3xl font-bold text-gray-600">R$ {estatisticas.gasto_medicamentos.toFixed(2)}</p>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-8 border border-gray-100 mb-8">
-          <h2 className="text-xl font-bold text-red-600 mb-4 text-center">Evolução dos Gastos</h2>
-          <div className="h-[300px] sm:h-[400px]">
-            <Line data={chartData} options={chartOptions} />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-8">
-          {/* Medicamentos */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-bold text-red-600 mb-4">Meus Medicamentos</h2>
-            <div className="space-y-4">
-              {loading.medicamentos ? (
-                <div className="flex justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-                </div>
-              ) : medicamentos.length === 0 ? (
-                <p className="text-gray-500 text-center">Nenhum medicamento registrado</p>
-              ) : (
-                medicamentos.map((medicamento) => (
-                  <div key={medicamento.id} className="p-4 bg-gray-50 rounded-lg">
-                    <h3 className="font-medium text-gray-900">{medicamento.nome}</h3>
-                    <p className="text-gray-600">{medicamento.descricao}</p>
-                    <p className="text-sm text-gray-500">
-                      Dosagem: {medicamento.dosagem} - Frequência: {medicamento.frequencia}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Prescrito por: {medicamento.medico?.nome || 'Médico não especificado'}
-                    </p>
-                  </div>
-                ))
-              )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-red-500">
+              <h3 className="text-lg font-medium text-gray-700">Gasto Total</h3>
+              <p className="mt-2 text-3xl font-bold text-red-600">R$ {estatisticas.gasto_total.toFixed(2)}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-blue-500">
+              <h3 className="text-lg font-medium text-gray-700">Gasto em Consultas</h3>
+              <p className="mt-2 text-3xl font-bold text-blue-600">R$ {estatisticas.gasto_consultas.toFixed(2)}</p>
+            </div>
+            <div className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-gray-400">
+              <h3 className="text-lg font-medium text-gray-700">Gasto em Medicamentos</h3>
+              <p className="mt-2 text-3xl font-bold text-gray-600">R$ {estatisticas.gasto_medicamentos.toFixed(2)}</p>
             </div>
           </div>
 
-          {/* Consultas */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-bold text-red-600 mb-4">Minhas Consultas</h2>
-            <div className="space-y-4">
-              {loading.consultas ? (
-                <div className="flex justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-                </div>
-              ) : consultas.length === 0 ? (
-                <p className="text-gray-500 text-center">Nenhuma consulta registrada</p>
-              ) : (
-                consultas.map((consulta) => (
-                  <div key={consulta.id} className="p-4 bg-gray-50 rounded-lg">
-                    <h3 className="font-medium text-gray-900">
-                      Consulta com {consulta.medico?.nome || 'Médico não especificado'}
-                    </h3>
-                    <p className="text-gray-600">{consulta.descricao}</p>
-                    <p className="text-sm text-gray-500">
-                      Data: {new Date(consulta.data).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))
-              )}
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-8 border border-gray-100 mb-8">
+            <h2 className="text-xl font-bold text-red-600 mb-4 text-center">Evolução dos Gastos</h2>
+            <div className="h-[300px] sm:h-[400px]">
+              <Line data={chartData} options={chartOptions} />
             </div>
           </div>
 
-          {/* Gastos */}
-          <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-            <h2 className="text-xl font-bold text-red-600 mb-4">Meus Gastos</h2>
-            <div className="space-y-4">
-              {loading.gastos ? (
-                <div className="flex justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
-                </div>
-              ) : gastos.length === 0 ? (
-                <p className="text-gray-500 text-center">Nenhum gasto registrado</p>
-              ) : (
-                gastos.map((gasto) => (
-                  <div key={gasto.id} className="p-4 bg-gray-50 rounded-lg">
-                    <h3 className="font-medium text-gray-900">{gasto.descricao}</h3>
-                    <p className="text-gray-600">R$ {gasto.valor.toFixed(2)}</p>
-                    <p className="text-sm text-gray-500">
-                      Categoria: {gasto.categoria} - Data: {new Date(gasto.data).toLocaleDateString()}
-                    </p>
+          <div className="grid grid-cols-1 gap-8">
+            {/* Medicamentos */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold text-red-600 mb-4">Meus Medicamentos</h2>
+              <div className="space-y-4">
+                {loading.medicamentos ? (
+                  <div className="flex justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
                   </div>
-                ))
-              )}
+                ) : medicamentos.length === 0 ? (
+                  <p className="text-gray-500 text-center">Nenhum medicamento registrado</p>
+                ) : (
+                  medicamentos.map((medicamento) => (
+                    <div key={medicamento.id} className="p-4 bg-gray-50 rounded-lg">
+                      <h3 className="font-medium text-gray-900">{medicamento.nome}</h3>
+                      <p className="text-gray-600">{medicamento.descricao}</p>
+                      <p className="text-sm text-gray-500">
+                        Dosagem: {medicamento.dosagem} - Frequência: {medicamento.frequencia}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Prescrito por: {medicamento.medico?.nome || 'Médico não especificado'}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Consultas */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold text-red-600 mb-4">Minhas Consultas</h2>
+              <div className="space-y-4">
+                {loading.consultas ? (
+                  <div className="flex justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                  </div>
+                ) : consultas.length === 0 ? (
+                  <p className="text-gray-500 text-center">Nenhuma consulta registrada</p>
+                ) : (
+                  consultas.map((consulta) => (
+                    <div key={consulta.id} className="p-4 bg-gray-50 rounded-lg">
+                      <h3 className="font-medium text-gray-900">
+                        Consulta com {consulta.medico?.nome || 'Médico não especificado'}
+                      </h3>
+                      <p className="text-gray-600">{consulta.descricao}</p>
+                      <p className="text-sm text-gray-500">
+                        Data: {new Date(consulta.data).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Gastos */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h2 className="text-xl font-bold text-red-600 mb-4">Meus Gastos</h2>
+              <div className="space-y-4">
+                {loading.gastos ? (
+                  <div className="flex justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                  </div>
+                ) : gastos.length === 0 ? (
+                  <p className="text-gray-500 text-center">Nenhum gasto registrado</p>
+                ) : (
+                  gastos.map((gasto) => (
+                    <div key={gasto.id} className="p-4 bg-gray-50 rounded-lg">
+                      <h3 className="font-medium text-gray-900">{gasto.descricao}</h3>
+                      <p className="text-gray-600">R$ {gasto.valor.toFixed(2)}</p>
+                      <p className="text-sm text-gray-500">
+                        Categoria: {gasto.categoria} - Data: {new Date(gasto.data).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
